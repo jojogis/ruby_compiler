@@ -1,0 +1,470 @@
+
+<File>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "arr"/>
+<Value>
+<Array>
+<elements>
+<expr>
+<Const value = "1"/>
+</expr>
+<expr>
+<Const value = "2"/>
+</expr>
+<expr>
+<Const value = "3"/>
+</expr>
+</elements>
+</Array>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "arr"/>
+<Value>
+<Plus>
+<left>
+<Identifier name = "arr"/>
+</left>
+<right>
+<Array>
+<elements>
+<expr>
+<Const value = "4"/>
+</expr>
+<expr>
+<Const value = "5"/>
+</expr>
+<expr>
+<String value = "hjg"/>
+</expr>
+</elements>
+</Array>
+</right>
+</Plus>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Push>
+<left>
+<Identifier name = "arr"/>
+</left>
+<right>
+<Const value = "34"/>
+</right>
+</Push>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Identifier name = "arr"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<ArrayItemAccess>
+<array>
+<Identifier name = "arr"/>
+</array>
+<index>
+<Const value = "1"/>
+</index>
+</ArrayItemAccess>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Plus>
+<left>
+<String value = "hello"/>
+</left>
+<right>
+<String value = "world"/>
+</right>
+</Plus>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "a"/>
+<Value>
+<Plus>
+<left>
+<Const value = "2"/>
+</left>
+<right>
+<ConstF value = "2.200000"/>
+</right>
+</Plus>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "n"/>
+<Value>
+<Nil/>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "s"/>
+<Value>
+<Or>
+<left>
+<Identifier name = "n"/>
+</left>
+<right>
+<Const value = "2"/>
+</right>
+</Or>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "b"/>
+<Value>
+<String value = "dsdds"/>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "b"/>
+<Value>
+<ArrayItemAccess>
+<array>
+<Identifier name = "b"/>
+</array>
+<index>
+<Const value = "0"/>
+</index>
+</ArrayItemAccess>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<If>
+<condition>
+<Eq>
+<left>
+<Identifier name = "a"/>
+</left>
+<right>
+<Const value = "1"/>
+</right>
+</Eq>
+</condition>
+<true>
+<Statement>
+<StatementList>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "a"/>
+<Value>
+<Plus>
+<left>
+<Identifier name = "a"/>
+</left>
+<right>
+<Const value = "2"/>
+</right>
+</Plus>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</StatementList>
+</Statement>
+</true>
+<false>
+<Statement>
+<If>
+<condition>
+<Bool value = "0"/>
+</condition>
+<true>
+<Statement>
+<StatementList>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "a"/>
+<Value>
+<Const value = "100500"/>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</StatementList>
+</Statement>
+</true>
+<false>
+<Statement>
+<StatementList>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "a"/>
+<Value>
+<Const value = "67676"/>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</StatementList>
+</Statement>
+</false>
+</If>
+</Statement>
+</false>
+</If>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<While>
+<condition>
+<Lt>
+<left>
+<Identifier name = "a"/>
+</left>
+<right>
+<Const value = "10"/>
+</right>
+</Lt>
+</condition>
+<block>
+<Statement>
+<StatementList>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "a"/>
+<Value>
+<Mul>
+<left>
+<Identifier name = "a"/>
+</left>
+<right>
+<Const value = "2"/>
+</right>
+</Mul>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</StatementList>
+</Statement>
+</block>
+</While>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<If>
+<condition>
+<And>
+<left>
+<Neg>
+<Lt>
+<left>
+<Const value = "7"/>
+</left>
+<right>
+<Const value = "2"/>
+</right>
+</Lt>
+</Neg>
+</left>
+<right>
+<Bool value = "1"/>
+</right>
+</And>
+</condition>
+<true>
+<Statement>
+<StatementList>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "s"/>
+<Value>
+<String value = "hui"/>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</StatementList>
+</Statement>
+</true>
+</If>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<If>
+<condition>
+<Neg>
+<Nil/>
+</Neg>
+</condition>
+<true>
+<Statement>
+<StatementList>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Identifier name = "b"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</StatementList>
+</Statement>
+</true>
+</If>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<And>
+<left>
+<Neg>
+<Lt>
+<left>
+<Const value = "7"/>
+</left>
+<right>
+<Const value = "2"/>
+</right>
+</Lt>
+</Neg>
+</left>
+<right>
+<Bool value = "1"/>
+</right>
+</And>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Identifier name = "a"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Identifier name = "s"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+</File>
