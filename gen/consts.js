@@ -4,6 +4,7 @@ module.exports = {
   major_version: 45,
   ACC_PUBLIC: 0x01,
   ACC_STATIC: 0x08,
+  ACC_SUPER: 0x20,
   NOP: 00,
   ACONST_NULL: 1,
   ICONST_M1: 2,

@@ -1,0 +1,35 @@
+arr = [1,2,3]
+arr = arr + [4, 5, "hjg"]
+arr << 34
+puts(arr)
+puts(arr[1])
+puts("hello" + "world")
+a = 2 + 2.2
+n = nil
+s = n || 2
+b = "dsdds"
+b = b[0]
+
+if a == 1
+    a = a + 2
+elsif false
+    a = 100500
+else 
+    a = 67676
+end
+while a < 10
+    a = a * 2
+end
+if !(7 < 2) && true
+    s = "hui"
+end
+if !nil
+    puts(b)
+end
+puts(!(7 < 2) && true)
+puts(a)
+puts(s)
+
+def func
+    3
+end

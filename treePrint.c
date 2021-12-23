@@ -258,8 +258,12 @@ void expression_print(struct Expression * expr)
 				break;
             case ExprTypeDot:
 				openTag("Dot");
+                openTag("left");
 				expression_print(expr->left);
+                closeTag("left");
+                openTag("right");
 				expression_print(expr->right);
+                closeTag("right");
 				closeTag("Dot");
 				break;
 			case ExprTypeArrayItemAccess:
@@ -274,6 +278,9 @@ void expression_print(struct Expression * expr)
 				break;
 			case ExprTypeIdentifier:
 				printf("\n<Identifier name = \"%s\"/>", expr->name);
+				break;
+            case ExprTypeClassIdentifier:
+				printf("\n<ClassIdentifier name = \"%s\"/>", expr->name);
 				break;
 			case ExprTypeObjectFieldAccess:
 				openTag("ObjectFieldAccess");

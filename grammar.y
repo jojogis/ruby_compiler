@@ -110,6 +110,7 @@ expression
                 | expression '/' opt_nl expression    {$$ = CreateBinaryExpr(ExprTypeDiv, 	$1, $4);}
                 | expression '%' opt_nl expression    {$$ = CreateBinaryExpr(ExprTypeMod, 	$1, $4);}
                 | expression '.' opt_nl VAR_METHOD_ID    {$$ = CreateBinaryExpr(ExprTypeDot,     $1, CreateIdentifierExpr($4));}
+                | expression '.' opt_nl CLASS    {$$ = CreateBinaryExpr(ExprTypeDot,     $1, CreateIdentifierExpr("class"));}
                 | expression DOUBLE_COLON_OP opt_nl expression {$$ = CreateBinaryExpr(ExprTypeDot,     $1, $4);}
                 | '!' opt_nl expression               {$$ = CreateUnaryExpr(ExprTypeNeg,      $3);}
                 | NOT opt_nl expression               {$$ = CreateUnaryExpr(ExprTypeNeg,      $3);}
@@ -120,7 +121,7 @@ expression
                 | '[' opt_nl expression_list opt_nl ']' {$$ = CreateArrayExpr($3);}
                 | VAR_METHOD_ID '(' opt_nl expression_list opt_nl ')' {$$ = CreateFunctionCallExpr(CreateIdentifierExpr($1), $4);}
                 | VAR_METHOD_ID	                        {$$ = CreateIdentifierExpr($1);}
-                | CLASS_ID	                            {$$ = CreateIdentifierExpr($1);}
+                | CLASS_ID	                            {$$ = CreateClassIdentifierExpr($1);}
                 | CONSTANT                              {$$ = CreateConstantExpr($1);}
                 | CONSTANT_F                            {$$ = CreateFloatConstantExpr($1);}
                 | TRUE                                  {$$ = CreateBoolExpr(1);}
@@ -207,6 +208,14 @@ definition
                 : DEF VAR_METHOD_ID new_line statement_list	END                         {$$ = CreateDefinition($2, NULL, $4);}
                 | DEF VAR_METHOD_ID '(' parameter_list ')' new_line statement_list	END {$$ = CreateDefinition($2, $4, $7);}
                 | DEF VAR_METHOD_ID parameter_list new_line statement_list	END         {$$ = CreateDefinition($2, $3, $5);}
+                | DEF '+' '(' parameter_list ')' new_line statement_list	END {$$ = CreateDefinition("plusROP", $4, $7);}
+                | DEF '+' parameter_list new_line statement_list	END         {$$ = CreateDefinition("plusROP", $3, $5);}
+                | DEF '-' '(' parameter_list ')' new_line statement_list	END {$$ = CreateDefinition("minusROP", $4, $7);}
+                | DEF '-' parameter_list new_line statement_list	END         {$$ = CreateDefinition("minusROP", $3, $5);}
+                | DEF '*' '(' parameter_list ')' new_line statement_list	END {$$ = CreateDefinition("multROP", $4, $7);}
+                | DEF '*' parameter_list new_line statement_list	END         {$$ = CreateDefinition("multROP", $3, $5);}
+                | DEF '/' '(' parameter_list ')' new_line statement_list	END      {$$ = CreateDefinition("divROP", $4, $7);}
+                | DEF '/' parameter_list new_line statement_list	END         {$$ = CreateDefinition("divROP", $3, $5);}
                 ;
                 
 parameter       

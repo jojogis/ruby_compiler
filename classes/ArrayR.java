@@ -27,7 +27,11 @@ public class ArrayR extends ObjectR{
     
     public ObjectR indexROP (ObjectR other) throws Exception{
         if (other instanceof IntegerR) {
-            return arrayVal.get(other.intValue);
+            try {
+                return arrayVal.get(other.intValue);
+            } catch (Exception e) {
+                return new NilR();
+            }
         } else {
             throw new Exception("TypeError: no implicit conversion of "+other.getClass().getName() + " into integer");
         }

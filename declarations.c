@@ -46,6 +46,17 @@ struct Expression * CreateIdentifierExpr(char * id)
 	return result;
 }
 
+//создание выражение для id
+struct Expression * CreateClassIdentifierExpr(char * id)
+{
+	struct Expression *result = (struct Expression *)malloc(sizeof(struct Expression));
+	CleanStructExpression(result);
+	
+	result->type = ExprTypeClassIdentifier;
+	result->name = id;
+	return result;
+}
+
 //создание выражение для bool
 struct Expression * CreateBoolExpr(int num)
 {

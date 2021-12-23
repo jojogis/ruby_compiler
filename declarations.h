@@ -101,4 +101,6 @@ struct Expression * CreateNilExpr();
 
 struct Expression * CreateArrayExpr(struct ExpressionList * args);
 
+struct Expression * CreateClassIdentifierExpr(char * id);
+
 EXTERN_C_END

@@ -28,7 +28,7 @@ const parser = require('xml2json');
 const CONSTS = require('./consts');
 const genFunc = require('./generate');
 const FUNCTIONCLASS = 'Main';
-const FUNCTIONTYPE = '()LObjectR;'; //TODO заменить на базовый класс
+const FUNCTIONTYPE = 'LObjectR;'; //TODO заменить на базовый класс
 let MainFunc = {};
 
 fs.readFile( '../tree.xml', function(err, data) {
@@ -64,16 +64,28 @@ function doSemantic(root, semanticProgram){
       semanticStmt(externalDeclaration.Statement, funcClass, MainFunc, semanticProgram);
     }
   })
+  Object.keys(semanticProgram.classesTable).forEach((semanticClassName) => {
+    addClassToConstants(funcClass.constantsTable, semanticClassName);
+    addMethodrefToConstants(funcClass.constantsTable, semanticClassName, "()V", "<init>");
+  })
 }
 
 //семантика функций
 function semanticFunction(func, semanticProgram, semanticClass) {
-  let methodrefConst =
-    addMethodrefToConstants(semanticClass.constantsTable, semanticClass.name, FUNCTIONTYPE, func.name);
   let arguments = func.Parameters && func.Parameters.Parameter;
   if (arguments && !(arguments instanceof Array)) arguments = [arguments];
+  let type = '(';
+  if (arguments) {
+    arguments.forEach((arg) => {
+      type += FUNCTIONTYPE;
+    })
+  }
+  type += ')' + FUNCTIONTYPE;
+  let methodrefConst =
+    addMethodrefToConstants(semanticClass.constantsTable, semanticClass.name, type, func.name);
   let statements = func.Block.StatementList.Statement;
   let semanticMethod = {
+    name: func.name,
     methodrefConst: methodrefConst,
     arguments: arguments,
     localVariableTable: {},
@@ -85,7 +97,7 @@ function semanticFunction(func, semanticProgram, semanticClass) {
     })
   }
   semanticClass.methodsTable[func.name] = semanticMethod;
-  //semanticStmtList(semanticMethod.body, semanticClass, semanticMethod, semanticProgram);
+  semanticStmtList(semanticMethod.body, semanticClass, semanticMethod, semanticProgram);
   return semanticMethod;
 }
 
@@ -97,9 +109,15 @@ function semanticClass(classObj, semanticProgram) {
     fieldsTable: {},
     methodsTable: {}
   }
+  //добавим в таблицу констант класса "Code"
+  addCodeToConstants(semanticClass.constantsTable);
   let classConst = addClassToConstants(semanticClass.constantsTable, classObj.classname);
-  addClassToConstants(semanticClass.constantsTable, OBJECTLCLASS);
   semanticClass.classConst = classConst;
+  addClassToConstants(semanticClass.constantsTable, OBJECTLCLASS);
+  semanticClass.initNameConst = addUtf8ToConstants(semanticClass.constantsTable, "<init>");
+  semanticClass.initDescriptorConst = addUtf8ToConstants(semanticClass.constantsTable, "()V");
+  semanticClass.objectInit = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "()V", "<init>");//Родитель
+  addRTL(semanticClass);
   let statements = classObj.StatementList.Statement;
   statements = (statements instanceof Array) ? statements : [statements];
   statements.forEach((stmt) => {
@@ -107,6 +125,7 @@ function semanticClass(classObj, semanticProgram) {
       semanticFunction(stmt.Definition, semanticProgram, semanticClass);
     }
   })
+
   semanticProgram.classesTable[classObj.classname] = semanticClass;
   return semanticClass;
 }
@@ -187,6 +206,9 @@ function semanticExpr(expression, semanticClass, semanticMethod, semanticProgram
   } else if (expression.Or) {
     semanticExpr(expression.Or.left, semanticClass, semanticMethod, semanticProgram);
     semanticExpr(expression.Or.right, semanticClass, semanticMethod, semanticProgram);
+  } else if (expression.Dot) {
+    semanticExpr(expression.Dot.left, semanticClass, semanticMethod, semanticProgram);
+    semanticExpr(expression.Dot.right, semanticClass, semanticMethod, semanticProgram);
   } else if (expression.Neg) {
     semanticExpr(expression.Neg, semanticClass, semanticMethod, semanticProgram);
   } else if (expression.ArrayItemAccess) {
@@ -212,7 +234,7 @@ function addLocalVariableToTable(name, semanticMethod) {
   if (semanticMethod.localVariableTable[name] != null)
     return semanticMethod.localVariableTable[name];
   let semanticLocalVariable = {
-    id: Object.keys(semanticMethod.localVariableTable).length + 1,
+    id: Object.keys(semanticMethod.localVariableTable).length,
     name: name
   }
   semanticMethod.localVariableTable[name] = semanticLocalVariable;
@@ -415,6 +437,7 @@ function addMainFunction(semanticProgram, semanticClass) {
   let methodrefConst =
     addMethodrefToConstants(semanticClass.constantsTable, semanticClass.name, '([Ljava/lang/String;)V', 'main');
   let semanticMethod = {
+    name: 'main',
     methodrefConst: methodrefConst,
     arguments: [{name: 'args'}],
     localVariableTable: {},
@@ -429,7 +452,7 @@ function addMainFunction(semanticProgram, semanticClass) {
 
   semanticClass.methodsTable['main'] = semanticMethod;
   MainFunc = semanticMethod;
-  //semanticStmtList(semanticMethod.body, semanticClass, semanticMethod, semanticProgram);
+  semanticStmtList(semanticMethod.body, semanticClass, semanticMethod, semanticProgram);
   return semanticMethod;
 }
 
@@ -441,6 +464,7 @@ function addRTL (semanticClass) {
   semanticClass.divROP = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;)LObjectR;", "divROP");
   semanticClass.indexROP = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;)LObjectR;", "indexROP");
   semanticClass.pushROP = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;)LObjectR;", "pushROP");
+  semanticClass.classNameR = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "()LStringR;", "class_name");
 
   semanticClass.boolVal = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "()I", "to_32int");
 

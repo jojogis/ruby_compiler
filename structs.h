@@ -63,6 +63,7 @@ enum ExprType {
     ExprTypeUPlus,			// унарный плюс
     ExprTypeObjectFieldAccess, // доступ к полю класса (Class.methods)
     ExprTypeIdentifier,		// обращение к переменной или вызов метода без параметров
+    ExprTypeClassIdentifier,	
 	ExprTypeFunctionCallArgs,	// вызов функции с параметрами
     ExprTypeString,			// строка
     ExprTypeArrayItemAccess, //Доступ к элементу массива
