@@ -103,4 +103,8 @@ struct Expression * CreateArrayExpr(struct ExpressionList * args);
 
 struct Expression * CreateClassIdentifierExpr(char * id);
 
+struct Statement * CreatePrivateStatement();
+
+struct Statement * CreateStaticStatement(struct StatementList *stmtList);
+
 EXTERN_C_END

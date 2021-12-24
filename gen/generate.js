@@ -12,18 +12,24 @@ const SemanticConstantType = {
   Methodref: 10,		// описание метода класса (CONSTANT_Class, CONSTANT_NameAndType)
   InterfaceMethodref: 11 // описание метода интерфейса (CONSTANT_Class, CONSTANT_NameAndType)
 };
+
+const ACC = {
+  PUBLIC: 0,
+  PRIVATE: 1
+}
+
 const FUNCTIONCLASS = 'Main';
 
 let semanticProgramGlobal = {};
 
 const genFunc = function (semanticProgram) {
-  if (!fs.existsSync('../classes')){
-    fs.mkdirSync('../classes');
+  if (!fs.existsSync('classes')){
+    fs.mkdirSync('classes');
   }
   semanticProgramGlobal = semanticProgram;
   Object.keys(semanticProgram.classesTable).forEach((semanticClassName) => {
-    fs.writeFileSync(`../classes/${semanticClassName}.class`,'');
-    let writeStream = fs.createWriteStream(`../classes/${semanticClassName}.class`);
+    fs.writeFileSync(`classes/${semanticClassName}.class`,'');
+    let writeStream = fs.createWriteStream(`classes/${semanticClassName}.class`);
     writeBinary(writeStream, [...CONSTS.magic, 0, CONSTS.minor_version, 0, CONSTS.major_version]);
     /*  таблица констант */
     writeConstants(writeStream, semanticProgram.classesTable[semanticClassName].constantsTable);
@@ -46,22 +52,28 @@ const genFunc = function (semanticProgram) {
     writeMethods(writeStream, semanticProgram.classesTable[semanticClassName]);
     //количество атрибутов класса
     writeBinary(writeStream, toU2(0));
-    console.log(JSON.stringify(semanticProgram.classesTable[semanticClassName].methodsTable, null, 1))
-    console.log(123)
   })
 }
 
 function writeFields (writeStream, fieldsTable) {
   // количество полей - 2 байта
-  //writeBinary(writeStream, toU2(Object.keys(fieldsTable).length));
-  writeBinary(writeStream, toU2(0));
+  writeBinary(writeStream, toU2(Object.keys(fieldsTable).length));
+
+  Object.keys(fieldsTable).forEach((field) => {
+    writeBinary(writeStream, toU2(CONSTS.ACC_PRIVATE));
+    writeBinary(writeStream, toU2(fieldsTable[field].nameConst.id))
+    writeBinary(writeStream, toU2(fieldsTable[field].typeConst.id))
+    writeBinary(writeStream, toU2(0))
+  })
+
+
 }
 
 function writeMethods (writeStream, semanticClass) {
   let isFuncClass = semanticClass.classConst.const1.utf8Const == FUNCTIONCLASS;
   let methodsTable = semanticClass.methodsTable;
   // количество методов - 2 байта
-  writeBinary(writeStream, toU2(Object.keys(methodsTable).length + (isFuncClass ? 0 : 1) ));
+  writeBinary(writeStream, toU2(Object.keys(methodsTable).length + (isFuncClass ? 0 : 1) - (Object.keys(methodsTable).indexOf('initialize') == -1 ? 0 : 1) ));
   if(!isFuncClass){
     // init
     writeBinary(writeStream, toU2(CONSTS.ACC_PUBLIC));
@@ -71,15 +83,20 @@ function writeMethods (writeStream, semanticClass) {
     writeBinary(writeStream, toU2(1));
     let byteCode = [CONSTS.ALOAD_0, CONSTS.INVOKESPECIAL];
     byteCode = byteCode.concat(toU2(semanticClass.objectInit.id));
+    if (semanticClass.methodsTable['initialize']){
+      byteCode = byteCode.concat(createByteCodeFromStatementList(semanticClass.methodsTable['initialize'].body, semanticClass, semanticClass.methodsTable['initialize']))
+    }
+    //byteCode.push(CONSTS.POP);//Конструктор возвращает экземпляр убираем лишнее
     byteCode.push(CONSTS._RETURN);
     // индекс константы Code
     writeBinary(writeStream, toU2(1));
     // длина оставшейся части атрибута
     writeBinary(writeStream, toU4(12 + byteCode.length)); // why 12? - Use calc & VM spec, Luke.
     // размер стека
-    writeBinary(writeStream, toU2(1));
+    writeBinary(writeStream, toU2(100));
     //количество локальных переменных метода
-    writeBinary(writeStream, toU2(1));
+    let argsCount = semanticClass.methodsTable['initialize'] && semanticClass.methodsTable['initialize'].arguments ? semanticClass.methodsTable['initialize'].arguments.length : 0
+    writeBinary(writeStream, toU2(1 + argsCount));
     // Длина байткода
     writeBinary(writeStream, toU4(byteCode.length));
     //byteArray
@@ -91,23 +108,27 @@ function writeMethods (writeStream, semanticClass) {
 
   }
   Object.keys(methodsTable).forEach((semanticMethodName) => {
-    let semanticMethod = methodsTable[semanticMethodName];
-    if (isFuncClass) {
-      writeBinary(writeStream, toU2(CONSTS.ACC_STATIC | CONSTS.ACC_PUBLIC));
-    } else {
-      writeBinary(writeStream, toU2(CONSTS.ACC_PUBLIC));
+    if (semanticMethodName != 'initialize') {
+      let semanticMethod = methodsTable[semanticMethodName];
+      if (isFuncClass) {
+        writeBinary(writeStream, toU2(CONSTS.ACC_STATIC | CONSTS.ACC_PUBLIC));
+      } else {
+        if (semanticMethod.isStatic) {
+          writeBinary(writeStream, toU2(CONSTS.ACC_PUBLIC | CONSTS.ACC_STATIC));
+        } else {
+          writeBinary(writeStream, toU2(semanticMethod.access == ACC.PUBLIC ? CONSTS.ACC_PUBLIC : CONSTS.ACC_PRIVATE));
+        }
+      }
+      //имя метода
+      writeBinary(writeStream, toU2(semanticMethod.methodrefConst.const2.const1.id));
+      //дескриптор метода
+      writeBinary(writeStream, toU2(semanticMethod.methodrefConst.const2.const2.id));
+      // количество атрибутов метода(атрибут - Code)
+      writeBinary(writeStream, toU2(1));
+      // атрибут Code
+      writeCodeAttribute(writeStream, semanticClass, semanticMethod);
     }
-    //имя метода
-    writeBinary(writeStream, toU2(semanticMethod.methodrefConst.const2.const1.id));
-    //дескриптор метода
-    writeBinary(writeStream, toU2(semanticMethod.methodrefConst.const2.const2.id));
-    // количество атрибутов метода(атрибут - Code)
-    writeBinary(writeStream, toU2(1));
-    // атрибут Code
-    writeCodeAttribute(writeStream, semanticClass, semanticMethod);
   })
-
-
 
 }
 
@@ -119,7 +140,6 @@ function writeCodeAttribute (writeStream, semanticClass, semanticMethod) {
   } else {
     byteCode.push(CONSTS.ARETURN);
   }
-  console.log(byteCode);
   // индекс константы Code
   writeBinary(writeStream, toU2(1));
   // длина оставшейся части атрибута
@@ -183,6 +203,7 @@ function createByteCodeFromStatement (statement, semanticClass, semanticMethod) 
     let statements = statement.While.block.Statement.StatementList.Statement;
     statements = (statements instanceof Array) ? statements : [statements];
     let blockBytes = createByteCodeFromStatementList(statements, semanticClass, semanticMethod);
+    for(let i = 0; i < statements.length; i++)blockBytes.push(CONSTS.POP)//TODO костыль, разобраться
     bytes.push(CONSTS.GOTO);
     bytes = bytes.concat(toU2(blockBytes.length+3));
     bytes = bytes.concat(blockBytes);
@@ -202,6 +223,7 @@ function createByteCodeFromStatement (statement, semanticClass, semanticMethod) 
       let statements = statement.If.true.Statement.StatementList.Statement;
       statements = (statements instanceof Array) ? statements : [statements];
       blockBytes = createByteCodeFromStatementList(statements, semanticClass, semanticMethod);
+      for(let i = 0; i < statements.length; i++)blockBytes.push(CONSTS.POP)//TODO костыль, разобраться
     } else { //однострочный
       blockBytes = createByteCodeFromExpr(statement.If.true.Statement.Expr, semanticClass, semanticMethod);
     }
@@ -232,13 +254,25 @@ function createByteCodeFromStatement (statement, semanticClass, semanticMethod) 
 }
 
 function createByteCodeFromExpr (expression, semanticClass, semanticMethod) {
-  console.log(expression)
   let bytes = [];
   if (expression.Assign) {
-    bytes = bytes.concat(createByteCodeFromExpr(expression.Assign.Value, semanticClass, semanticMethod));
-    bytes.push(CONSTS.DUP);
-    bytes.push(CONSTS.ASTORE);
-    bytes = bytes.concat(semanticMethod.localVariableTable[expression.Assign.Identifier.name].id);
+
+    if (expression.Assign.Identifier.name.startsWith('__dog__')) {
+      bytes.push(CONSTS.ALOAD_0);//ref на этот класс
+      bytes = bytes.concat(createByteCodeFromExpr(expression.Assign.Value, semanticClass, semanticMethod));
+      bytes.push(CONSTS.PUTFIELD);
+      let id = semanticClass.fieldsTable[expression.Assign.Identifier.name].fieldRef.id;
+      bytes = bytes.concat(toU2(id));
+      //возвращаем значение после присваивания
+      bytes.push(CONSTS.ALOAD_0);
+      bytes.push(CONSTS.GETFIELD);
+      bytes = bytes.concat(toU2(id));
+    } else {
+      bytes = bytes.concat(createByteCodeFromExpr(expression.Assign.Value, semanticClass, semanticMethod));
+      bytes.push(CONSTS.DUP);//возвращаем значение после присваивания
+      bytes.push(CONSTS.ASTORE);
+      bytes = bytes.concat(semanticMethod.localVariableTable[expression.Assign.Identifier.name].id);
+    }
   } else if (expression.Bool) {
     bytes.push(CONSTS.NEW);
     bytes = bytes.concat(toU2(semanticClass.boolConst.id));
@@ -286,27 +320,105 @@ function createByteCodeFromExpr (expression, semanticClass, semanticMethod) {
     bytes.push(floatConstId);
     bytes.push(CONSTS.INVOKESPECIAL);
     bytes = bytes.concat(toU2(semanticClass.floatInit.id));
-  } else if (expression.FuncCall) {
+  } else if (expression.FuncCall) { //вызов функции со скобками
+    let argBytes = [];
     let arguments = (expression.FuncCall.arguments.expr instanceof Array) ? expression.FuncCall.arguments.expr : [expression.FuncCall.arguments.expr];
     arguments.forEach((argument) => {
-      bytes = bytes.concat(createByteCodeFromExpr(argument, semanticClass, semanticMethod));
+      argBytes = argBytes.concat(createByteCodeFromExpr(argument, semanticClass, semanticMethod));
     })
-    if (expression.FuncCall.func.Identifier.name == "puts") {
-      bytes.push(CONSTS.INVOKESTATIC);
-      bytes = bytes.concat(toU2(semanticClass.putsRef.id));
-    } else if (semanticClass.name == "Main")  {
-      bytes.push(CONSTS.INVOKESTATIC);
-      bytes = bytes.concat(toU2(semanticClass.methodsTable[expression.FuncCall.func.Identifier.name].methodrefConst.id));
+    if (expression.FuncCall.func.Identifier) {
+      bytes = bytes.concat(argBytes);
+      if (expression.FuncCall.func.Identifier.name == "puts") {
+        bytes.push(CONSTS.INVOKESTATIC);
+        bytes = bytes.concat(toU2(semanticClass.putsRef.id));
+      } else if (semanticClass.name == "Main")  {
+        bytes.push(CONSTS.INVOKESTATIC);
+        bytes = bytes.concat(toU2(semanticClass.methodsTable[expression.FuncCall.func.Identifier.name].methodrefConst.id));
+      }
+    } else if (expression.FuncCall.func.Dot) {
+      //Дублирует expression.Dot
+      if (expression.FuncCall.func.Dot.left.ClassIdentifier) {//Если обращаемся к статическому методу класса
+        if (expression.FuncCall.func.Dot.right.Identifier && expression.FuncCall.func.Dot.right.Identifier.name == "new") {//Если вызывается конструктор
+          bytes.push(CONSTS.NEW);
+          let classConst = semanticClass.constantsTable.find((cnst) => cnst.type == SemanticConstantType.Class && cnst.const1.utf8Const == expression.FuncCall.func.Dot.left.ClassIdentifier.name);
+          if (classConst == null) throw new Error("Undefined class " + expression.FuncCall.func.Dot.left.ClassIdentifier.name);
+          bytes = bytes.concat(toU2(classConst.id));
+          bytes.push(CONSTS.DUP);
+          bytes = bytes.concat(argBytes);
+          bytes.push(CONSTS.INVOKESPECIAL);
+          let initConst = semanticClass.constantsTable.find((cnst) => cnst.type == SemanticConstantType.Methodref && cnst.const1 == classConst && cnst.const2.const1.utf8Const == "<init>");
+          bytes = bytes.concat(toU2(initConst.id));
+        } else {
+          let methodRefConst = semanticClass.constantsTable.find((cnst) => cnst.type == SemanticConstantType.Methodref &&
+              cnst.const1.const1.utf8Const == expression.FuncCall.func.Dot.left.ClassIdentifier.name && cnst.const2.const1.utf8Const == expression.FuncCall.func.Dot.right.Identifier.name);
+          bytes = bytes.concat(argBytes);
+          bytes.push(CONSTS.INVOKESTATIC);
+          bytes = bytes.concat(toU2(methodRefConst.id));
+
+        }
+      } else {
+        let callingCall = expression.FuncCall.func.Dot.right.Identifier.name == "call";
+
+        bytes = bytes.concat(createByteCodeFromExpr(expression.FuncCall.func.Dot.left, semanticClass, semanticMethod));
+        if (callingCall) {
+          //Берем имя функции из первого аргумента
+          bytes = bytes.concat(createByteCodeFromExpr(arguments[0], semanticClass, semanticMethod));
+          arguments = arguments.splice(1);
+        } else {
+          bytes.push(CONSTS.NEW);//создаем объект строки с именем метода
+          bytes = bytes.concat(toU2(semanticClass.stringConst.id));
+          bytes.push(CONSTS.DUP);
+          bytes.push(CONSTS.LDC);
+          let strVal = expression.FuncCall.func.Dot.right.Identifier.name;
+          let strConstId = semanticClass.constantsTable.find((cnst) => cnst.type == SemanticConstantType.String && cnst.const1.utf8Const == strVal).id;
+          bytes.push(strConstId);
+          bytes.push(CONSTS.INVOKESPECIAL);
+          bytes = bytes.concat(toU2(semanticClass.stringInit.id));
+        }
+
+        //аргументы
+        bytes.push(CONSTS.BIPUSH);
+        bytes.push(arguments.length);
+        bytes.push(CONSTS.ANEWARRAY);
+        bytes = bytes.concat(toU2(semanticClass.objConst.id));
+
+        arguments.forEach((argument, index) => {
+          bytes.push(CONSTS.DUP);
+          //Индекс элемента массива
+          bytes.push(CONSTS.BIPUSH);
+          bytes.push(index);
+          //значение
+          bytes = bytes.concat(createByteCodeFromExpr(argument, semanticClass, semanticMethod));
+
+          bytes.push(CONSTS.AASTORE);
+        })
+
+        //Вызываем метод через call
+        bytes.push(CONSTS.INVOKEVIRTUAL);
+        bytes = bytes.concat(toU2(semanticClass.callR.id));
+
+      }
     }
+
   } else if (expression.Identifier) {
     let varConst = semanticMethod.localVariableTable[expression.Identifier.name];
     if (varConst) {
       bytes.push(CONSTS.ALOAD);
       bytes = bytes.concat(varConst.id);
+    } else if (semanticClass.fieldsTable[expression.Identifier.name]) {
+      bytes.push(CONSTS.ALOAD_0);
+      bytes.push(CONSTS.GETFIELD);
+      bytes = bytes.concat(toU2(semanticClass.fieldsTable[expression.Identifier.name].fieldRef.id));
+    } else if (expression.Identifier.name == "gets") {
+      bytes.push(CONSTS.INVOKESTATIC);
+      bytes = bytes.concat(toU2(semanticClass.getsRef.id));
     } else {
       if (semanticClass.name == "Main")
         bytes.push(CONSTS.INVOKESTATIC);
-      bytes = bytes.concat(toU2(semanticClass.methodsTable[expression.Identifier.name].methodrefConst.id));
+      if (semanticClass.methodsTable[expression.Identifier.name])
+        bytes = bytes.concat(toU2(semanticClass.methodsTable[expression.Identifier.name].methodrefConst.id));
+      else
+        throw new Error("undefined variable " + expression.Identifier.name)
     }
   } else if (expression.Plus) {
     bytes = bytes.concat(createByteCodeFromExpr(expression.Plus.left, semanticClass, semanticMethod));
@@ -424,22 +536,53 @@ function createByteCodeFromExpr (expression, semanticClass, semanticMethod) {
       bytes.push(CONSTS.INVOKEVIRTUAL);
       bytes = bytes.concat(toU2(semanticClass.pushROP.id));
     })
-  } else if (expression.Dot) {
+  } else if (expression.Dot) {//вызов функции без скобок
     //вызов функции
-    if (expression.Dot.left.ClassIdentifier) {//Если обращаемся к статическому меоду класса
+    if (expression.Dot.left.ClassIdentifier) {//Если обращаемся к статическому методу класса
       if (expression.Dot.right.Identifier && expression.Dot.right.Identifier.name == "new") {//Если вызывается конструктор
         bytes.push(CONSTS.NEW);
         let classConst = semanticClass.constantsTable.find((cnst) => cnst.type == SemanticConstantType.Class && cnst.const1.utf8Const == expression.Dot.left.ClassIdentifier.name);
+        if (classConst == null) throw new Error("Undefined class " + expression.Dot.left.ClassIdentifier.name);
         bytes = bytes.concat(toU2(classConst.id));
         bytes.push(CONSTS.DUP);
         bytes.push(CONSTS.INVOKESPECIAL);
         let initConst = semanticClass.constantsTable.find((cnst) => cnst.type == SemanticConstantType.Methodref && cnst.const1 == classConst && cnst.const2.const1.utf8Const == "<init>");
         bytes = bytes.concat(toU2(initConst.id));
+      } else {
+        let methodRefConst = semanticClass.constantsTable.find((cnst) => cnst.type == SemanticConstantType.Methodref &&
+            cnst.const1.const1.utf8Const == expression.Dot.left.ClassIdentifier.name && cnst.const2.const1.utf8Const == expression.Dot.right.Identifier.name);
+        bytes.push(CONSTS.INVOKESTATIC);
+        bytes = bytes.concat(toU2(methodRefConst.id));
+
       }
     } else if (expression.Dot.right.Identifier.name == "class") { // Если получаем имя класса
       bytes = bytes.concat(createByteCodeFromExpr(expression.Dot.left, semanticClass, semanticMethod));
       bytes.push(CONSTS.INVOKEVIRTUAL);
       bytes = bytes.concat(toU2(semanticClass.classNameR.id));
+    } else if (expression.Dot.right.Identifier.name == "to_s") { // Если получаем имя класса
+      bytes = bytes.concat(createByteCodeFromExpr(expression.Dot.left, semanticClass, semanticMethod));
+      bytes.push(CONSTS.INVOKEVIRTUAL);
+      bytes = bytes.concat(toU2(semanticClass.to_sR.id));
+    } else {
+      bytes = bytes.concat(createByteCodeFromExpr(expression.Dot.left, semanticClass, semanticMethod));
+
+      bytes.push(CONSTS.NEW);//создаем объект строки с именем метода
+      bytes = bytes.concat(toU2(semanticClass.stringConst.id));
+      bytes.push(CONSTS.DUP);
+      bytes.push(CONSTS.LDC);
+      let strVal = expression.Dot.right.Identifier.name;
+      let strConstId = semanticClass.constantsTable.find((cnst) => cnst.type == SemanticConstantType.String && cnst.const1.utf8Const == strVal).id;
+      bytes.push(strConstId);
+      bytes.push(CONSTS.INVOKESPECIAL);
+      bytes = bytes.concat(toU2(semanticClass.stringInit.id));
+
+      //Заглушка для аргументов
+      bytes.push(CONSTS.ICONST_0);
+      bytes.push(CONSTS.ANEWARRAY);
+      bytes = bytes.concat(toU2(semanticClass.objConst.id));
+      //Вызываем метод через call
+      bytes.push(CONSTS.INVOKEVIRTUAL);
+      bytes = bytes.concat(toU2(semanticClass.callR.id));
     }
 
   }

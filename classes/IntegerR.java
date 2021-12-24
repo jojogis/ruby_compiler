@@ -4,7 +4,7 @@ public class IntegerR extends ObjectR implements ComparableR{
         intValue = num;
     }
     
-    public StringR to_s() {
+    public ObjectR to_s() {
         return new StringR(String.valueOf(intValue));
     }
     

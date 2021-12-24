@@ -216,6 +216,18 @@ struct Statement * CreateDefinitionStatement(struct Definition *definition)
 	return result;
 }
 
+// stmt из Definition
+struct Statement * CreateStaticStatement(struct StatementList *stmtList)
+{
+	struct Statement *result = (struct Statement *) malloc(sizeof(struct Statement));
+	CleanStructStatement(result);
+	
+	result->type = StmtTypeStatic;
+	result->stmtList = stmtList;
+	
+	return result;
+}
+
 // stmt из expr'a
 struct Statement * CreateExprStatement(struct Expression *expr)
 {
@@ -303,6 +315,16 @@ struct Statement * CreateReturnStatement(struct Expression *expr)
 	result->expr = expr;
 	return result;
 }
+
+struct Statement * CreatePrivateStatement()
+{
+    struct Statement *result = (struct Statement *) malloc(sizeof(struct Statement));
+	CleanStructStatement(result);
+	
+	result->type = StmtTypePrivate;
+	return result;
+}
+
 
 // создание списка stmt
 struct StatementList * CreateStatementList(struct Statement *stmt)
@@ -469,6 +491,8 @@ struct ExternalDeclaration * CreateFuncExternalDeclaration(struct Definition * f
     result->function = func;
     return result;
 }
+
+
 
 struct ExternalDeclaration * CreateStmtExternalDeclaration(struct Statement * stmt)
 {

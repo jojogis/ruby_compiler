@@ -112,10 +112,11 @@ extern int yydebug;
     GR_EQ_OP = 318,
     NOT_OP = 319,
     NOT_EQ_OP = 320,
-    AND = 321,
-    OR = 322,
-    NOT = 323,
-    PUSH_OP = 324
+    PRIVATE = 321,
+    AND = 322,
+    OR = 323,
+    NOT = 324,
+    PUSH_OP = 325
   };
 #endif
 
@@ -143,7 +144,7 @@ union YYSTYPE
 		struct LabeledStatement * lbldStmt;
 		struct LabeledStatementList *lbldStmtList;
 
-#line 147 "grammar.tab.h"
+#line 148 "grammar.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

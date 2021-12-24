@@ -1,6 +1,9 @@
 import java.util.ArrayList;
+import java.lang.reflect.*;
  
 public class ObjectR {
+
+    public ObjectR test;
 
     public float floatValue;
 
@@ -12,6 +15,21 @@ public class ObjectR {
     
     public String strValue;
     
+    public ObjectR call(ObjectR name, ObjectR ... args) throws Exception{//, 
+        ArrayList<Class<?>> arr = new ArrayList<Class<?>>();
+        
+        for(int i = 0; i < args.length; i++){
+            arr.add(ObjectR.class);
+        }
+        
+        Method method = getClass().getMethod(name.to_s().strValue, arr.toArray(new Class<?>[0]));
+        return (ObjectR)method.invoke(this, (Object[])args);
+    }
+    
+    public void test() throws Exception{
+    
+        call(new ObjectR(), new ObjectR());
+    }
     public IntegerR to_i() throws Exception{
         throw new Exception("NoMethodError: undefined method `to_i' for " + getClass().getName());
     }
@@ -19,7 +37,7 @@ public class ObjectR {
     public StringR class_name () {
         return new StringR(getClass().getName());
     }
-    public StringR to_s () {
+    public ObjectR to_s () {
         return new StringR("");
     }
     

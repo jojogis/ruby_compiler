@@ -4,7 +4,7 @@ public class StringR extends ObjectR{
         strValue = str;
     }
     
-    public StringR to_s() {
+    public ObjectR to_s() {
         return this;
     }
     
@@ -32,6 +32,8 @@ public class StringR extends ObjectR{
             throw new Exception("TypeError: no implicit conversion of "+other.getClass().getName() + " into String");
         }
     }
+    
+    public void test(){}
 
     //нужно для логических операций
     public int to_32int() {

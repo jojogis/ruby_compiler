@@ -2,7 +2,7 @@ public class BooleanR extends ObjectR{
     public BooleanR(boolean value) {
         boolValue = value;
     }
-    public StringR to_s() {
+    public ObjectR to_s() {
         if (boolValue) {
             return new StringR("true");
         } else {

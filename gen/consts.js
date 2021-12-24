@@ -3,6 +3,7 @@ module.exports = {
   minor_version: 3,
   major_version: 45,
   ACC_PUBLIC: 0x01,
+  ACC_PRIVATE: 0x02,
   ACC_STATIC: 0x08,
   ACC_SUPER: 0x20,
   NOP: 00,

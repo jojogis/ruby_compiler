@@ -105,7 +105,9 @@ enum StmtType {
     StmtTypeBreak,			// break
     StmtTypeReturn,			// return
     StmtDefinition,
-    StmtTypeBlock
+    StmtTypeBlock,
+    StmtTypePrivate,
+    StmtTypeStatic
 };
 
 struct Statement {
@@ -116,6 +118,7 @@ struct Statement {
 	struct Statement *elseBlock;	// оператор для else 
     struct Statement *block;       // тело
     struct Definition *definition;
+    struct StatementList *stmtList;
     struct LabeledStatementList *labeledList;
 	struct Statement *next;    
 };

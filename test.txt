@@ -1,19 +1,110 @@
-def sum_array(arr1, arr2)
-    arr1 + arr2
+complex = Complex.new(1, 2.0)
+second = Complex.new(2, 3.0)
+
+camp = Camp.new
+
+puts(complex.natural.natural)
+puts(camp.natural)
+
+puts("-----")
+puts(camp.method_of_super_camp)
+puts(camp.method_of_super_camp1)
+
+puts(complex.with_arg(2,2))
+puts(camp.with_arg(2,2))
+
+Complex.static_func
+Complex.static_func1
+Complex.static_func_args("342")
+
+
+puts(camp.call("with_" + "arg", 2, 2))
+puts(camp.("with_" + "arg", 2, 2))
+
+p = nil
+puts(p)
+puts(p = 2)
+
+
+a = [1,2,3,[2,3,4]]
+puts(a.to_s)
+
+b = 2 + 3
+
+if b < 10
+    b = b + 2
+    puts(b)
+end 
+
+puts(b)
+
+class SuperCamp
+    def method_of_super_camp1
+        228
+    end
+    def method_of_super_camp
+        228
+    end
 end
 
-puts(sum_array([1,2],[3,4]))
 
-a = Camp.new
-puts(a+"333")
-puts(a.price)
-class Camp
-
-    def price
-        "313123"
+class Camp < SuperCamp
+    #Override
+    def method_of_super_camp1
+        1337
     end
+    def natural
+        1
+    end
+    def with_arg(arg1, arg2)
+        arg1 * arg2 * 4
+    end
+end
+
+class Complex
+
+    def initialize(a,b)
+        @natural = a
+        @virtual = b
+        
+    end
+    
+    class << self
+        def static_func
+            puts("hello from static")
+        end
+        
+        def static_func1
+            puts("hello from static")
+        end
+        def static_func_args(arg)
+            puts("hello from static: " + arg)
+        end
+    end
+    
+    def to_s
+        @natural.to_s + " " + @virtual.to_s
+    end
+    
+    def natural
+        Camp.new
+    end
+    
+    def with_arg(arg1,arg2)
+        arg1 * arg2 * 2
+    end
+    
+    private
+    
+    def virtual
+        @virtual
+    end
+    
+    
     def +(other)
-        "23123"
+        Complex.new(@natural + other.natural, @virtual + other.virtual)
+    
     end
 
 end
+

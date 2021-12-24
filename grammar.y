@@ -4,11 +4,11 @@
         #include "declarations.h"
 
         extern int yylex(void);
-        extern int yydebug=1;
+        extern int yydebug=0;
 
         struct ExternalDeclarationList *root;
 
-        #define YYERROR_VERBOSE 1
+        #define YYERROR_VERBOSE 0
 %}
 
 %union {
@@ -34,7 +34,7 @@
 %type <expr>			expression
 %type <exprList>        expression_list
 %type <stmt> 			statement if_statement if_line_statement selection_statement elsif_statement statement_of_class compound_statement
-%type <stmtList> 		statement_list statement_list_of_class
+%type <stmtList> 		statement_list statement_list_of_class definitions_list
 %type <def>             definition
 %type <program>			translation_unit program_unit
 %type <extDecl>			external_declaration
@@ -53,7 +53,7 @@
 %token BEGIN_K ALIAS BREAK CASE DEFINED ENSURE FOR IN MODULE NEXT OR_OP AND_OP
 %token REDO RESCUE RETRY SELF SUPER THEN UNDEF UNTIL WHEN TRUE FALSE UMINUS UPLUS UCOLON
 %token YIELD NIL ADD_ASSIGN_OP SUB_ASSIGN_OP MULT_ASSIGN_OP COMPARE_OP DOUBLE_COLON_OP RANGE_OUT_OP RANGE_IN_OP
-%token DIV_ASSIGN_OP MOD_ASSIGN_OP EXP_ASSIGN_OP EXP_OP EQ_STRONG_OP EQ_OP LE_EQ_OP GR_EQ_OP NOT_OP NOT_EQ_OP
+%token DIV_ASSIGN_OP MOD_ASSIGN_OP EXP_ASSIGN_OP EXP_OP EQ_STRONG_OP EQ_OP LE_EQ_OP GR_EQ_OP NOT_OP NOT_EQ_OP PRIVATE
 
 %start program_unit
 
@@ -110,7 +110,8 @@ expression
                 | expression '/' opt_nl expression    {$$ = CreateBinaryExpr(ExprTypeDiv, 	$1, $4);}
                 | expression '%' opt_nl expression    {$$ = CreateBinaryExpr(ExprTypeMod, 	$1, $4);}
                 | expression '.' opt_nl VAR_METHOD_ID    {$$ = CreateBinaryExpr(ExprTypeDot,     $1, CreateIdentifierExpr($4));}
-                | expression '.' opt_nl CLASS    {$$ = CreateBinaryExpr(ExprTypeDot,     $1, CreateIdentifierExpr("class"));}
+                | expression '.' opt_nl '(' opt_nl expression_list opt_nl ')'     {$$ = CreateFunctionCallExpr( CreateBinaryExpr(ExprTypeDot, $1, CreateIdentifierExpr("call")), $6);} //Алиас для call
+                | expression '.' opt_nl CLASS         {$$ = CreateBinaryExpr(ExprTypeDot,     $1, CreateIdentifierExpr("class"));}
                 | expression DOUBLE_COLON_OP opt_nl expression {$$ = CreateBinaryExpr(ExprTypeDot,     $1, $4);}
                 | '!' opt_nl expression               {$$ = CreateUnaryExpr(ExprTypeNeg,      $3);}
                 | NOT opt_nl expression               {$$ = CreateUnaryExpr(ExprTypeNeg,      $3);}
@@ -119,7 +120,7 @@ expression
                 | ':' expression %prec UCOLON           {$$ = CreateUnaryExpr(ExprTypeSymbol,   $2);}
                 | expression '[' opt_nl expression opt_nl ']' {$$ = CreateBinaryExpr(ExprTypeArrayItemAccess, $1, $4);}
                 | '[' opt_nl expression_list opt_nl ']' {$$ = CreateArrayExpr($3);}
-                | VAR_METHOD_ID '(' opt_nl expression_list opt_nl ')' {$$ = CreateFunctionCallExpr(CreateIdentifierExpr($1), $4);}
+                | expression '(' opt_nl expression_list opt_nl ')' {$$ = CreateFunctionCallExpr($1, $4);}
                 | VAR_METHOD_ID	                        {$$ = CreateIdentifierExpr($1);}
                 | CLASS_ID	                            {$$ = CreateClassIdentifierExpr($1);}
                 | CONSTANT                              {$$ = CreateConstantExpr($1);}
@@ -129,6 +130,7 @@ expression
                 | STRING_LITERAL                        {$$ = CreateStringExpr($1);}
                 | SUPER                                 {$$ = CreateSuperExpr();}
                 | NIL                                   {$$ = CreateNilExpr();}
+                | SELF                                   {$$ = CreateIdentifierExpr("self");}
                 | '(' opt_nl expression opt_nl ')'      {$$ = $3;}
                 ;
 //список аргументов выражения
@@ -156,6 +158,13 @@ compound_statement
 statement_of_class 
                 : definition new_line                           {$$ = CreateDefinitionStatement($1);}
                 | statement                                     {$$ = CreateStmtExternalDeclaration($1);}
+                | PRIVATE opt_nl                                {$$ = CreatePrivateStatement();}
+                | CLASS PUSH_OP SELF opt_nl definitions_list END opt_nl {$$ = CreateStaticStatement($5);}
+                ;
+                
+definitions_list
+                : /*empty*/         		                    {$$ = NULL;}
+                | definitions_list definition new_line          {if ($1 == NULL) $$ = CreateStatementList(CreateDefinitionStatement($2)); else $$ = AddToStatementList($1, CreateDefinitionStatement($2));}
                 ;
 
 statement_list

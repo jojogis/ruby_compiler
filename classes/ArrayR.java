@@ -6,7 +6,7 @@ public class ArrayR extends ObjectR{
         arrayVal = new ArrayList<>();
     }
     
-    public StringR to_s() {
+    public ObjectR to_s() {
         String result = "[";
         for (ObjectR obj: arrayVal){
             result += obj.to_s().strValue + ", ";

@@ -417,6 +417,15 @@ void statement_print(struct Statement *stmt)
             case StmtDefinition:
                 definition_print(stmt->definition);
                 break;
+            case StmtTypePrivate:
+                openTag("Private");
+				closeTag("Private");
+                break;
+            case StmtTypeStatic:
+                openTag("Static");
+                statementlist_print(stmt->stmtList);
+				closeTag("Static");
+                break;
             case StmtTypeBlock:
                 statementlist_print(stmt->block);
                 break;

@@ -26,6 +26,8 @@ class_id [A-Z][_a-zA-Z0-9]*
 
 %%
 
+private return PRIVATE;
+
 true return TRUE;
 
 false return FALSE;

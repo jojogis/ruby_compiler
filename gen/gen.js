@@ -11,6 +11,11 @@ const SemanticConstantType = {
     InterfaceMethodref: 11 // описание метода интерфейса (CONSTANT_Class, CONSTANT_NameAndType)
 };
 
+const ACC = {
+  PUBLIC: 0,
+  PRIVATE: 1
+}
+
 const UNIVERSALCLASS = 'java/lang/Object';
 const OBJECTLCLASS = 'ObjectR';
 const INTEGERCLASS = 'IntegerR';
@@ -31,7 +36,7 @@ const FUNCTIONCLASS = 'Main';
 const FUNCTIONTYPE = 'LObjectR;'; //TODO заменить на базовый класс
 let MainFunc = {};
 
-fs.readFile( '../tree.xml', function(err, data) {
+fs.readFile( 'tree.xml', function(err, data) {
   var json = parser.toJson(data);
   let root = JSON.parse(json).File;
   //console.log(JSON.stringify(root, null, 1));
@@ -64,14 +69,37 @@ function doSemantic(root, semanticProgram){
       semanticStmt(externalDeclaration.Statement, funcClass, MainFunc, semanticProgram);
     }
   })
+  //
+  addOtherClassesMethodRefs(semanticProgram, funcClass);
   Object.keys(semanticProgram.classesTable).forEach((semanticClassName) => {
-    addClassToConstants(funcClass.constantsTable, semanticClassName);
-    addMethodrefToConstants(funcClass.constantsTable, semanticClassName, "()V", "<init>");
+    addOtherClassesMethodRefs(semanticProgram, semanticProgram.classesTable[semanticClassName]);
+  })
+}
+
+function addOtherClassesMethodRefs(semanticProgram, semanticClass) {
+  Object.keys(semanticProgram.classesTable).forEach((semanticClassName) => {
+    if (semanticClassName != "Main" ) { //&& semanticClass.name != semanticClassName
+      //Добавляем конструктор
+      addClassToConstants(semanticClass.constantsTable, semanticClassName);
+      let type = '(';
+      if (semanticProgram.classesTable[semanticClassName].methodsTable['initialize'] && semanticProgram.classesTable[semanticClassName].methodsTable['initialize'].arguments) {
+        semanticProgram.classesTable[semanticClassName].methodsTable['initialize'].arguments.forEach((arg) => {
+          type += FUNCTIONTYPE;
+        })
+      }
+      type += ')V';
+      addMethodrefToConstants(semanticClass.constantsTable, semanticClassName, type, "<init>");
+      Object.keys(semanticProgram.classesTable[semanticClassName].methodsTable).forEach((methodName) => {
+        if (methodName != 'plusROP' && methodName != 'minusROP' && methodName != 'multROP' && methodName != 'divROP' && methodName != 'initialize' && methodName != 'to_s') {
+          addMethodrefToConstants(semanticClass.constantsTable, semanticClassName, semanticProgram.classesTable[semanticClassName].methodsTable[methodName].type, methodName);
+        }
+      })
+    }
   })
 }
 
 //семантика функций
-function semanticFunction(func, semanticProgram, semanticClass) {
+function semanticFunction(func, semanticProgram, semanticClass, access, isStatic = false) {
   let arguments = func.Parameters && func.Parameters.Parameter;
   if (arguments && !(arguments instanceof Array)) arguments = [arguments];
   let type = '(';
@@ -83,13 +111,19 @@ function semanticFunction(func, semanticProgram, semanticClass) {
   type += ')' + FUNCTIONTYPE;
   let methodrefConst =
     addMethodrefToConstants(semanticClass.constantsTable, semanticClass.name, type, func.name);
-  let statements = func.Block.StatementList.Statement;
+  let statements = func.Block.StatementList ? func.Block.StatementList.Statement : [];
   let semanticMethod = {
     name: func.name,
+    type: type,
     methodrefConst: methodrefConst,
     arguments: arguments,
     localVariableTable: {},
+    access: access,
+    isStatic: isStatic,
     body: (statements instanceof Array) ? statements : [statements]
+  }
+  if (semanticClass.name != FUNCTIONCLASS && !semanticMethod.isStatic) {
+    addLocalVariableToTable("self", semanticMethod);
   }
   if (semanticMethod.arguments) {
     semanticMethod.arguments.forEach((arg) => {
@@ -113,18 +147,38 @@ function semanticClass(classObj, semanticProgram) {
   addCodeToConstants(semanticClass.constantsTable);
   let classConst = addClassToConstants(semanticClass.constantsTable, classObj.classname);
   semanticClass.classConst = classConst;
-  addClassToConstants(semanticClass.constantsTable, OBJECTLCLASS);
-  semanticClass.initNameConst = addUtf8ToConstants(semanticClass.constantsTable, "<init>");
-  semanticClass.initDescriptorConst = addUtf8ToConstants(semanticClass.constantsTable, "()V");
-  semanticClass.objectInit = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "()V", "<init>");//Родитель
+  let parentName = classObj.Parent ? classObj.Parent.Identifier.name : OBJECTLCLASS;
+  semanticClass.objectInit = addMethodrefToConstants(semanticClass.constantsTable, parentName, "()V", "<init>");//Родитель
   addRTL(semanticClass);
   let statements = classObj.StatementList.Statement;
   statements = (statements instanceof Array) ? statements : [statements];
+  let currentAccessFlag = ACC.PUBLIC;
+
   statements.forEach((stmt) => {
     if (stmt.Definition) {
-      semanticFunction(stmt.Definition, semanticProgram, semanticClass);
+      semanticFunction(stmt.Definition, semanticProgram, semanticClass, currentAccessFlag);
+    } else if (stmt.Private !== undefined) {
+      currentAccessFlag = ACC.PRIVATE;
+    } else if (stmt.Static) {
+      let staticStmts = (stmt.Static.StatementList.Statement instanceof Array) ? stmt.Static.StatementList.Statement : [stmt.Static.StatementList.Statement];
+      staticStmts.forEach((staticStmt) => {
+        semanticFunction(staticStmt.Definition, semanticProgram, semanticClass, currentAccessFlag, true);
+      })
     }
   })
+
+  addClassToConstants(semanticClass.constantsTable, parentName);
+  semanticClass.initNameConst = addUtf8ToConstants(semanticClass.constantsTable, "<init>");
+  let type = '(';
+  if (semanticClass.methodsTable['initialize'] && semanticClass.methodsTable['initialize'].arguments) {
+    semanticClass.methodsTable['initialize'].arguments.forEach((arg) => {
+      type += FUNCTIONTYPE;
+    })
+  }
+  type += ')V';
+
+
+  semanticClass.initDescriptorConst = addUtf8ToConstants(semanticClass.constantsTable, type);
 
   semanticProgram.classesTable[classObj.classname] = semanticClass;
   return semanticClass;
@@ -165,8 +219,15 @@ function semanticStmt(statement, semanticClass, semanticMethod, semanticProgram)
 function semanticExpr(expression, semanticClass, semanticMethod, semanticProgram) {
   if (expression == null) return;
   if (expression.Assign) {
-    addLocalVariableToTable(expression.Assign.Identifier.name, semanticMethod);
+    if (expression.Assign.Identifier.name[0] == '@'){
+      expression.Assign.Identifier.name = expression.Assign.Identifier.name.replace('@', '__dog__');
+      addClassVariableToTable(expression.Assign.Identifier.name, semanticClass);
+    } else {
+      addLocalVariableToTable(expression.Assign.Identifier.name, semanticMethod);
+    }
     semanticExpr(expression.Assign.Value, semanticClass, semanticMethod, semanticProgram);
+  } else if (expression.Identifier) {
+    expression.Identifier.name = expression.Identifier.name.replace('@', '__dog__');
   } else if (expression.ConstF) {
     addFloatToConstants(semanticClass.constantsTable, parseFloat(expression.ConstF.value));
   } else if (expression.String) {
@@ -230,6 +291,24 @@ function semanticExpr(expression, semanticClass, semanticMethod, semanticProgram
   }
 }
 
+function addClassVariableToTable(name, semanticClass) {
+  if (semanticClass.fieldsTable[name] != null)
+    return semanticClass.fieldsTable[name];
+  let nameConst = addUtf8ToConstants(semanticClass.constantsTable, name);
+  let typeConst = addUtf8ToConstants(semanticClass.constantsTable, FUNCTIONTYPE);
+  let fieldRef = addFieldrefToConstants(semanticClass.constantsTable, semanticClass.name, FUNCTIONTYPE, name);
+  let semanticVariable = {
+    id: Object.keys(semanticClass.fieldsTable).length,
+    name: name,
+    nameConst: nameConst,
+    typeConst: typeConst,
+    fieldRef: fieldRef,
+    access: 0//private
+  }
+  semanticClass.fieldsTable[name] = semanticVariable;
+  return semanticVariable;
+}
+
 function addLocalVariableToTable(name, semanticMethod) {
   if (semanticMethod.localVariableTable[name] != null)
     return semanticMethod.localVariableTable[name];
@@ -262,7 +341,7 @@ function addFieldrefToConstants(constantsTable, classname, type, name) {
 function addMethodrefToConstants(constantsTable, classname, type, name) {
   let classConst = addClassToConstants(constantsTable, classname);
   let nameAndTypeConst = addNameAndTypeToConstants(constantsTable, name, type);
-
+  let stringConst = addStringToConstants(constantsTable, name);
   let methodrefConst = constantsTable.find((cnst) =>
     cnst.type == SemanticConstantType.Methodref && cnst.const1 == classConst && cnst.const2 == nameAndTypeConst);
   if (methodrefConst != null) return methodrefConst;
@@ -441,6 +520,8 @@ function addMainFunction(semanticProgram, semanticClass) {
     methodrefConst: methodrefConst,
     arguments: [{name: 'args'}],
     localVariableTable: {},
+    access: ACC.PUBLIC,
+    isStatic: true,
     body: []
   }
 
@@ -457,7 +538,7 @@ function addMainFunction(semanticProgram, semanticClass) {
 }
 
 function addRTL (semanticClass) {
-  let objConst = addClassToConstants(semanticClass.constantsTable, OBJECTLCLASS);
+  semanticClass.objConst = addClassToConstants(semanticClass.constantsTable, OBJECTLCLASS);
   semanticClass.plusROP = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;)LObjectR;", "plusROP");
   semanticClass.minusROP = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;)LObjectR;", "minusROP");
   semanticClass.multROP = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;)LObjectR;", "multROP");
@@ -465,6 +546,8 @@ function addRTL (semanticClass) {
   semanticClass.indexROP = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;)LObjectR;", "indexROP");
   semanticClass.pushROP = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;)LObjectR;", "pushROP");
   semanticClass.classNameR = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "()LStringR;", "class_name");
+  semanticClass.to_sR = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "()LObjectR;", "to_s");
+  semanticClass.callR = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "(LObjectR;[LObjectR;)LObjectR;", "call");
 
   semanticClass.boolVal = addMethodrefToConstants(semanticClass.constantsTable, OBJECTLCLASS, "()I", "to_32int");
 
@@ -474,6 +557,7 @@ function addRTL (semanticClass) {
   semanticClass.LeROP = addInterfaceMethodrefToConstants(semanticClass.constantsTable, COMPARABLEMODULE, "(LObjectR;)LObjectR;", "LeROP");
   semanticClass.GeROP = addInterfaceMethodrefToConstants(semanticClass.constantsTable, COMPARABLEMODULE, "(LObjectR;)LObjectR;", "GeROP");
   semanticClass.EqROP = addInterfaceMethodrefToConstants(semanticClass.constantsTable, COMPARABLEMODULE, "(LObjectR;)LObjectR;", "EqROP");
+
 
   semanticClass.integerConst = addClassToConstants(semanticClass.constantsTable, INTEGERCLASS);
   semanticClass.integerInit = addMethodrefToConstants(semanticClass.constantsTable, INTEGERCLASS, "(I)V", "<init>");
@@ -491,7 +575,8 @@ function addRTL (semanticClass) {
   semanticClass.arrayInit = addMethodrefToConstants(semanticClass.constantsTable, ARRAYCLASS, "()V", "<init>");
 
   semanticClass.IOConst = addClassToConstants(semanticClass.constantsTable, IOCLASS);
-  semanticClass.putsRef = addMethodrefToConstants(semanticClass.constantsTable, IOCLASS, "(LObjectR;)V", "puts");
+  semanticClass.putsRef = addMethodrefToConstants(semanticClass.constantsTable, IOCLASS, "(LObjectR;)LObjectR;", "puts");
+  semanticClass.getsRef = addMethodrefToConstants(semanticClass.constantsTable, IOCLASS, "()LObjectR;", "gets");
 
   semanticClass.stringConst = addClassToConstants(semanticClass.constantsTable, STRINGCLASS);
   semanticClass.stringInit = addMethodrefToConstants(semanticClass.constantsTable, STRINGCLASS, "(Ljava/lang/String;)V", "<init>");

@@ -1,74 +1,33 @@
 
 <File>
 <ExternalDeclaration>
-<Definition name = "sum_array" >
-<Parameters>
-<Parameter name = "arr1" >
-</Parameter>
-<Parameter name = "arr2" >
-</Parameter>
-</Parameters>
-<Block>
-<StatementList>
 <Statement>
 <Expr>
-<Plus>
+<Assign>
+<Identifier name = "complex"/>
+<Value>
+<FuncCall>
+<func>
+<Dot>
 <left>
-<Identifier name = "arr1"/>
+<ClassIdentifier name = "Complex"/>
 </left>
 <right>
-<Identifier name = "arr2"/>
+<Identifier name = "new"/>
 </right>
-</Plus>
-</Expr>
-</Statement>
-</StatementList>
-</Block>
-</Definition>
-</ExternalDeclaration>
-<ExternalDeclaration>
-<Statement>
-<Expr>
-<FuncCall>
-<func>
-<Identifier name = "puts"/>
+</Dot>
 </func>
 <arguments>
-<expr>
-<FuncCall>
-<func>
-<Identifier name = "sum_array"/>
-</func>
-<arguments>
-<expr>
-<Array>
-<elements>
 <expr>
 <Const value = "1"/>
 </expr>
 <expr>
-<Const value = "2"/>
-</expr>
-</elements>
-</Array>
-</expr>
-<expr>
-<Array>
-<elements>
-<expr>
-<Const value = "3"/>
-</expr>
-<expr>
-<Const value = "4"/>
-</expr>
-</elements>
-</Array>
+<ConstF value = "2.000000"/>
 </expr>
 </arguments>
 </FuncCall>
-</expr>
-</arguments>
-</FuncCall>
+</Value>
+</Assign>
 </Expr>
 </Statement>
 </ExternalDeclaration>
@@ -76,7 +35,38 @@
 <Statement>
 <Expr>
 <Assign>
-<Identifier name = "a"/>
+<Identifier name = "second"/>
+<Value>
+<FuncCall>
+<func>
+<Dot>
+<left>
+<ClassIdentifier name = "Complex"/>
+</left>
+<right>
+<Identifier name = "new"/>
+</right>
+</Dot>
+</func>
+<arguments>
+<expr>
+<Const value = "2"/>
+</expr>
+<expr>
+<ConstF value = "3.000000"/>
+</expr>
+</arguments>
+</FuncCall>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "camp"/>
 <Value>
 <Dot>
 <left>
@@ -100,14 +90,21 @@
 </func>
 <arguments>
 <expr>
-<Plus>
+<Dot>
 <left>
-<Identifier name = "a"/>
+<Dot>
+<left>
+<Identifier name = "complex"/>
 </left>
 <right>
-<String value = "333"/>
+<Identifier name = "natural"/>
 </right>
-</Plus>
+</Dot>
+</left>
+<right>
+<Identifier name = "natural"/>
+</right>
+</Dot>
 </expr>
 </arguments>
 </FuncCall>
@@ -125,10 +122,10 @@
 <expr>
 <Dot>
 <left>
-<Identifier name = "a"/>
+<Identifier name = "camp"/>
 </left>
 <right>
-<Identifier name = "price"/>
+<Identifier name = "natural"/>
 </right>
 </Dot>
 </expr>
@@ -138,15 +135,802 @@
 </Statement>
 </ExternalDeclaration>
 <ExternalDeclaration>
-<Class classname = "Camp" >
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<String value = "-----"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Dot>
+<left>
+<Identifier name = "camp"/>
+</left>
+<right>
+<Identifier name = "method_of_super_camp"/>
+</right>
+</Dot>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Dot>
+<left>
+<Identifier name = "camp"/>
+</left>
+<right>
+<Identifier name = "method_of_super_camp1"/>
+</right>
+</Dot>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<FuncCall>
+<func>
+<Dot>
+<left>
+<Identifier name = "complex"/>
+</left>
+<right>
+<Identifier name = "with_arg"/>
+</right>
+</Dot>
+</func>
+<arguments>
+<expr>
+<Const value = "2"/>
+</expr>
+<expr>
+<Const value = "2"/>
+</expr>
+</arguments>
+</FuncCall>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<FuncCall>
+<func>
+<Dot>
+<left>
+<Identifier name = "camp"/>
+</left>
+<right>
+<Identifier name = "with_arg"/>
+</right>
+</Dot>
+</func>
+<arguments>
+<expr>
+<Const value = "2"/>
+</expr>
+<expr>
+<Const value = "2"/>
+</expr>
+</arguments>
+</FuncCall>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Dot>
+<left>
+<ClassIdentifier name = "Complex"/>
+</left>
+<right>
+<Identifier name = "static_func"/>
+</right>
+</Dot>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Dot>
+<left>
+<ClassIdentifier name = "Complex"/>
+</left>
+<right>
+<Identifier name = "static_func1"/>
+</right>
+</Dot>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Dot>
+<left>
+<ClassIdentifier name = "Complex"/>
+</left>
+<right>
+<Identifier name = "static_func_args"/>
+</right>
+</Dot>
+</func>
+<arguments>
+<expr>
+<String value = "342"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<FuncCall>
+<func>
+<Dot>
+<left>
+<Identifier name = "camp"/>
+</left>
+<right>
+<Identifier name = "call"/>
+</right>
+</Dot>
+</func>
+<arguments>
+<expr>
+<Plus>
+<left>
+<String value = "with_"/>
+</left>
+<right>
+<String value = "arg"/>
+</right>
+</Plus>
+</expr>
+<expr>
+<Const value = "2"/>
+</expr>
+<expr>
+<Const value = "2"/>
+</expr>
+</arguments>
+</FuncCall>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<FuncCall>
+<func>
+<Dot>
+<left>
+<Identifier name = "camp"/>
+</left>
+<right>
+<Identifier name = "call"/>
+</right>
+</Dot>
+</func>
+<arguments>
+<expr>
+<Plus>
+<left>
+<String value = "with_"/>
+</left>
+<right>
+<String value = "arg"/>
+</right>
+</Plus>
+</expr>
+<expr>
+<Const value = "2"/>
+</expr>
+<expr>
+<Const value = "2"/>
+</expr>
+</arguments>
+</FuncCall>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "p"/>
+<Value>
+<Nil/>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Identifier name = "p"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Assign>
+<Identifier name = "p"/>
+<Value>
+<Const value = "2"/>
+</Value>
+</Assign>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "a"/>
+<Value>
+<Array>
+<elements>
+<expr>
+<Const value = "1"/>
+</expr>
+<expr>
+<Const value = "2"/>
+</expr>
+<expr>
+<Const value = "3"/>
+</expr>
+<expr>
+<Array>
+<elements>
+<expr>
+<Const value = "2"/>
+</expr>
+<expr>
+<Const value = "3"/>
+</expr>
+<expr>
+<Const value = "4"/>
+</expr>
+</elements>
+</Array>
+</expr>
+</elements>
+</Array>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Dot>
+<left>
+<Identifier name = "a"/>
+</left>
+<right>
+<Identifier name = "to_s"/>
+</right>
+</Dot>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "b"/>
+<Value>
+<Plus>
+<left>
+<Const value = "2"/>
+</left>
+<right>
+<Const value = "3"/>
+</right>
+</Plus>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<If>
+<condition>
+<Lt>
+<left>
+<Identifier name = "b"/>
+</left>
+<right>
+<Const value = "10"/>
+</right>
+</Lt>
+</condition>
+<true>
+<Statement>
 <StatementList>
 <Statement>
-<Definition name = "price" >
+<Expr>
+<Assign>
+<Identifier name = "b"/>
+<Value>
+<Plus>
+<left>
+<Identifier name = "b"/>
+</left>
+<right>
+<Const value = "2"/>
+</right>
+</Plus>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Identifier name = "b"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</StatementList>
+</Statement>
+</true>
+</If>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Identifier name = "b"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Class classname = "SuperCamp" >
+<StatementList>
+<Statement>
+<Definition name = "method_of_super_camp1" >
 <Block>
 <StatementList>
 <Statement>
 <Expr>
-<String value = "313123"/>
+<Const value = "228"/>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Definition name = "method_of_super_camp" >
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Const value = "228"/>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+</StatementList>
+</Class>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Class classname = "Camp" >
+<Parent>
+<Identifier name = "SuperCamp"/>
+</Parent>
+<StatementList>
+<Statement>
+<Definition name = "method_of_super_camp1" >
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Const value = "1337"/>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Definition name = "natural" >
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Const value = "1"/>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Definition name = "with_arg" >
+<Parameters>
+<Parameter name = "arg1" >
+</Parameter>
+<Parameter name = "arg2" >
+</Parameter>
+</Parameters>
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Mul>
+<left>
+<Mul>
+<left>
+<Identifier name = "arg1"/>
+</left>
+<right>
+<Identifier name = "arg2"/>
+</right>
+</Mul>
+</left>
+<right>
+<Const value = "4"/>
+</right>
+</Mul>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+</StatementList>
+</Class>
+</ExternalDeclaration>
+<ExternalDeclaration>
+<Class classname = "Complex" >
+<StatementList>
+<Statement>
+<Definition name = "initialize" >
+<Parameters>
+<Parameter name = "a" >
+</Parameter>
+<Parameter name = "b" >
+</Parameter>
+</Parameters>
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "@natural"/>
+<Value>
+<Identifier name = "a"/>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+<Statement>
+<Expr>
+<Assign>
+<Identifier name = "@virtual"/>
+<Value>
+<Identifier name = "b"/>
+</Value>
+</Assign>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Static>
+<StatementList>
+<Statement>
+<Definition name = "static_func" >
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<String value = "hello from static"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Definition name = "static_func1" >
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<String value = "hello from static"/>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Definition name = "static_func_args" >
+<Parameters>
+<Parameter name = "arg" >
+</Parameter>
+</Parameters>
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<FuncCall>
+<func>
+<Identifier name = "puts"/>
+</func>
+<arguments>
+<expr>
+<Plus>
+<left>
+<String value = "hello from static: "/>
+</left>
+<right>
+<Identifier name = "arg"/>
+</right>
+</Plus>
+</expr>
+</arguments>
+</FuncCall>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+</StatementList>
+</Static>
+</Statement>
+<Statement>
+<Definition name = "to_s" >
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Plus>
+<left>
+<Plus>
+<left>
+<Dot>
+<left>
+<Identifier name = "@natural"/>
+</left>
+<right>
+<Identifier name = "to_s"/>
+</right>
+</Dot>
+</left>
+<right>
+<String value = " "/>
+</right>
+</Plus>
+</left>
+<right>
+<Dot>
+<left>
+<Identifier name = "@virtual"/>
+</left>
+<right>
+<Identifier name = "to_s"/>
+</right>
+</Dot>
+</right>
+</Plus>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Definition name = "natural" >
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Dot>
+<left>
+<ClassIdentifier name = "Camp"/>
+</left>
+<right>
+<Identifier name = "new"/>
+</right>
+</Dot>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Definition name = "with_arg" >
+<Parameters>
+<Parameter name = "arg1" >
+</Parameter>
+<Parameter name = "arg2" >
+</Parameter>
+</Parameters>
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Mul>
+<left>
+<Mul>
+<left>
+<Identifier name = "arg1"/>
+</left>
+<right>
+<Identifier name = "arg2"/>
+</right>
+</Mul>
+</left>
+<right>
+<Const value = "2"/>
+</right>
+</Mul>
+</Expr>
+</Statement>
+</StatementList>
+</Block>
+</Definition>
+</Statement>
+<Statement>
+<Private>
+</Private>
+</Statement>
+<Statement>
+<Definition name = "virtual" >
+<Block>
+<StatementList>
+<Statement>
+<Expr>
+<Identifier name = "@virtual"/>
 </Expr>
 </Statement>
 </StatementList>
@@ -163,7 +947,54 @@
 <StatementList>
 <Statement>
 <Expr>
-<String value = "23123"/>
+<FuncCall>
+<func>
+<Dot>
+<left>
+<ClassIdentifier name = "Complex"/>
+</left>
+<right>
+<Identifier name = "new"/>
+</right>
+</Dot>
+</func>
+<arguments>
+<expr>
+<Plus>
+<left>
+<Identifier name = "@natural"/>
+</left>
+<right>
+<Dot>
+<left>
+<Identifier name = "other"/>
+</left>
+<right>
+<Identifier name = "natural"/>
+</right>
+</Dot>
+</right>
+</Plus>
+</expr>
+<expr>
+<Plus>
+<left>
+<Identifier name = "@virtual"/>
+</left>
+<right>
+<Dot>
+<left>
+<Identifier name = "other"/>
+</left>
+<right>
+<Identifier name = "virtual"/>
+</right>
+</Dot>
+</right>
+</Plus>
+</expr>
+</arguments>
+</FuncCall>
 </Expr>
 </Statement>
 </StatementList>
